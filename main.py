@@ -1,6 +1,6 @@
-import game as g
+import game
 
-game = g.Game()
-while game.running:
-    game.new()
-game.quit()
+g = game.Game()
+while g.running:
+    g.new()
+g.quit()

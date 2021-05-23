@@ -1,23 +1,24 @@
-import pygame as pg
-from settings import *
-from sprites import *
-from controls import *
+import pygame
+import settings
+import sprites
+import controls
 
 
 class Game:
     def __init__(self):
-        pg.init()
-        pg.mixer.init()
-        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
-        pg.display.set_caption(TITLE)
-        self.clock = pg.time.Clock()
+        pygame.init()
+        pygame.mixer.init()
+        self.screen = pygame.display.set_mode(
+            (settings.WIDTH, settings.HEIGHT))
+        pygame.display.set_caption(settings.TITLE)
+        self.clock = pygame.time.Clock()
         self.running = True
 
     def new(self):
         # start a new Game
-        self.players = pg.sprite.Group()
-        self.platforms = pg.sprite.Group()
-        self.all_sprites = pg.sprite.Group()
+        self.players = pygame.sprite.Group()
+        self.platforms = pygame.sprite.Group()
+        self.all_sprites = pygame.sprite.Group()
 
         self.add_platforms()
         self.add_players()
@@ -25,22 +26,25 @@ class Game:
 
     def add_platforms(self):
         """Creates and adds platforms to self.platforms and self.all_sprites."""
-        for p in PLATFORM_LIST:
-            self.platforms.add(Platform(*p, PLATFORM_COLOR))
-            self.all_sprites.add(Platform(*p, PLATFORM_COLOR))
+        for platform_attributes in settings.PLATFORM_LIST:
+            coordinates, dimensions = platform_attributes
+            platform = sprites.Platform(
+                coordinates, dimensions, settings.PLATFORM_COLOR)
+            self.platforms.add(platform)
+            self.all_sprites.add(platform)
 
     def add_players(self):
         """Creates and adds the players to self.players and self.all_sprites."""
-        self.player_1 = Player(
-            PLAYER_1_CONTROLS,
-            PLAYER_1_SPAWN_POINT,
-            PLAYER_1_COLOR
-            )
-        self.player_2 = Player(
-            PLAYER_2_CONTROLS,
-            PLAYER_2_SPAWN_POINT,
-            PLAYER_2_COLOR
-            )
+        self.player_1 = sprites.Player(
+            controls.PLAYER_1_CONTROLS,
+            settings.PLAYER_1_SPAWN_POINT,
+            settings.PLAYER_1_COLOR
+        )
+        self.player_2 = sprites.Player(
+            controls.PLAYER_2_CONTROLS,
+            settings.PLAYER_2_SPAWN_POINT,
+            settings.PLAYER_2_COLOR
+        )
         self.players.add(self.player_1)
         self.players.add(self.player_2)
         self.all_sprites.add(self.player_1)
@@ -50,17 +54,17 @@ class Game:
         # game loop
         self.playing = True
         while self.playing:
-            self.clock.tick(FPS)
+            self.clock.tick(settings.FPS)
             self.handle_events()
             self.update()
             self.render()
 
     def handle_events(self):
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 self.playing = False
                 self.running = False
-            elif event.type == pg.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 for player in self.players:
                     c = player.controls
                     if event.key == c.UP:
@@ -69,7 +73,7 @@ class Game:
     def update(self):
         self.all_sprites.update()
         for player in self.players:
-            hits = pg.sprite.spritecollide(player, self.platforms, False)
+            hits = pygame.sprite.spritecollide(player, self.platforms, False)
             if hits:
                 platform = hits[0]
                 if player.falling:
@@ -80,10 +84,9 @@ class Game:
                 player.standing = False
 
     def render(self):
-        self.screen.fill(BLACK)
+        self.screen.fill(settings.BLACK)
         self.all_sprites.draw(self.screen)
-        pg.display.flip()
+        pygame.display.flip()
 
     def quit(self):
-        pg.quit()
-
+        pygame.quit()

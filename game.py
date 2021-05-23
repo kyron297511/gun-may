@@ -1,6 +1,8 @@
+import os
 import pygame
 import settings
 import sprites
+import spritesheet
 import controls
 
 
@@ -35,15 +37,19 @@ class Game:
 
     def add_players(self):
         """Creates and adds the players to self.players and self.all_sprites."""
+        file_path = "assets/player/green/Gunner_Green_Idle.png"
+        image = pygame.image.load(file_path).convert_alpha()
+        sheet = spritesheet.Spritesheet(image)
+        player_1_idle = sheet.get_image(pygame.Rect(0,0,48,48))
         self.player_1 = sprites.Player(
             controls.PLAYER_1_CONTROLS,
             settings.PLAYER_1_SPAWN_POINT,
-            settings.PLAYER_1_COLOR
+            sprites.Animation(player_1_idle)
         )
         self.player_2 = sprites.Player(
             controls.PLAYER_2_CONTROLS,
             settings.PLAYER_2_SPAWN_POINT,
-            settings.PLAYER_2_COLOR
+            sprites.Animation(player_1_idle)
         )
         self.players.add(self.player_1)
         self.players.add(self.player_2)
@@ -84,7 +90,7 @@ class Game:
                 player.standing = False
 
     def render(self):
-        self.screen.fill(settings.BLACK)
+        self.screen.fill(settings.WHITE)
         self.all_sprites.draw(self.screen)
         pygame.display.flip()
 

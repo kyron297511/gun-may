@@ -6,21 +6,26 @@ import controls
 Vector = pygame.math.Vector2
 Sprite = pygame.sprite.Sprite
 
+class Animation():
+    def __init__(self, idle):
+        self.idle = idle
+
 
 class Player(Sprite):
     """A class for players."""
 
-    def __init__(self, controls: controls.KeyboardControl, spawn_point: tuple, color: tuple) -> None:
+    def __init__(self, controls: controls.KeyboardControl, spawn_point: tuple, animation: Animation) -> None:
         """
         Initializes the Player object.
 
         Parameters:
         controls (KeyboardControl): player keyboard control settings.
         spawn_point (tuple): coordinates (x, y) where player will be created.
-        color (tuple): values (R, G, B) that represent the player's color.
+        animations (Animation): contains images that represent the player's visual appearance.
         """
         super().__init__()
-        self.set_image(color)
+        self.animation = animation
+        self.set_image()
         self.set_vectors(spawn_point)
         self.set_rect()
 
@@ -38,9 +43,10 @@ class Player(Sprite):
         self.vel = Vector(0, 0)
         self.acc = Vector(0, 0)
 
-    def set_image(self, color):
-        self.image = pygame.Surface((20, 40))
-        self.image.fill(color)
+    def set_image(self):
+        # self.image = pygame.Surface((20, 40))
+        # self.image.fill(color)
+        self.image = self.animation.idle
 
     def update(self):
         self.update_acc()

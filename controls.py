@@ -1,4 +1,4 @@
-from settings import *
+import settings
 
 class KeyboardControl:
     def __init__(self, up, down, left, right):
@@ -8,15 +8,15 @@ class KeyboardControl:
         self.RIGHT = right
 
 PLAYER_1_CONTROLS = KeyboardControl(
-    PLAYER_1_UP,
-    PLAYER_1_DOWN,
-    PLAYER_1_LEFT,
-    PLAYER_1_RIGHT
+    settings.PLAYER_1_UP,
+    settings.PLAYER_1_DOWN,
+    settings.PLAYER_1_LEFT,
+    settings.PLAYER_1_RIGHT
 )
 
 PLAYER_2_CONTROLS = KeyboardControl(
-    PLAYER_2_UP,
-    PLAYER_2_DOWN,
-    PLAYER_2_LEFT,
-    PLAYER_2_RIGHT
+    settings.PLAYER_2_UP,
+    settings.PLAYER_2_DOWN,
+    settings.PLAYER_2_LEFT,
+    settings.PLAYER_2_RIGHT
 )

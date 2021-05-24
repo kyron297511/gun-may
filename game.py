@@ -71,8 +71,10 @@ class Game:
     def add_players(self):
         """Creates and adds the players to self.players and self.all_sprites."""
 
-        player_1_animations = self.get_player_animations("green")
-        player_2_animations = self.get_player_animations("red")
+        player_1_animations = self.get_player_animations(
+            settings.PLAYER_1_COLOR)
+        player_2_animations = self.get_player_animations(
+            settings.PLAYER_2_COLOR)
 
         self.player_1 = sprites.Player(
             controls.PLAYER_1_CONTROLS,
@@ -115,13 +117,13 @@ class Game:
                 player, self.platforms, False, pygame.sprite.collide_rect)
             if hits:
                 platform = hits[0]
-                if player.falling and player.pos.y <= platform.rect.top + 10:
+                # only count collision when falling and hitting top 4 pixels
+                if player.falling and player.pos.y <= platform.rect.top + (settings.PLAYER_OFFSET + 4):
                     player.vel.y = 0
                     player.standing = True
                     # offset due to sprite feet being 9 px from the bottom of the image
-                    player.pos.y = platform.rect.top + 9
-                    
-                    
+                    player.pos.y = platform.rect.top + settings.PLAYER_OFFSET
+
             else:
                 player.standing = False
 

@@ -115,9 +115,9 @@ class Player(Sprite):
             y_offset = settings.MUZZLE_FLASH_OFFSET_Y
             if self.vel.x != 0 and self.standing:
                 y_offset += settings.MUZZLE_FLASH_RUNNING_OFFSET_Y
-            
+
             self.image.blit(self.muzzle_flash, (x_offset, y_offset))
-            #if next(self.muzzle_flash_tick) == 1:
+            # if next(self.muzzle_flash_tick) == 1:
             self.shooting = False
 
     def flip_if_facing_left(self):
@@ -262,28 +262,3 @@ class Bullet(Sprite):
         # check if outside of screen
         if not (0 <= self.pos.x <= settings.WIDTH):
             self.kill()  # delete from all groups
-
-
-class MuzzleFlash(Sprite):
-    def __init__(self, image: pygame.Surface, position: tuple, direction):
-        super().__init__()
-        self.image = image
-        self.rect = self.image.get_rect()
-
-        x, y = position
-        x_offset = settings.BULLET_OFFSET_X
-        y_offset = settings.BULLET_OFFSET_Y
-
-        if direction == "left":
-            x_offset *= -1  # flip offset
-            self.image = pygame.transform.flip(
-                self.image, True, False)  # flip image
-
-        self.rect.center = (x + x_offset, y + y_offset)
-
-        self.lifetime = 5
-
-    def update(self):
-        self.lifetime -= 1
-        if self.lifetime == 0:
-            self.kill()

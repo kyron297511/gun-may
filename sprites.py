@@ -12,6 +12,15 @@ class Animation():
     """A class for player animations."""
 
     def __init__(self, idle: tuple[pygame.Surface], run: tuple[pygame.Surface], jump: tuple[pygame.Surface]):
+        """
+        Initializes the Animation object.
+
+        idle (tuple[pygame.Surface]): sequence of images for the idle animation.
+        run (tuple[pygame.Surface]): sequence of images for the run animation.
+        jump (tuple[pygame.Surface]): two images.
+            jump[0]: player going up.
+            jump[1]: player going down.
+        """
         self.idle = itertools.cycle(idle)
         self.run = itertools.cycle(run)
         self.jump = jump

@@ -4,7 +4,7 @@ from pygame.locals import *
 TITLE = "Gun Mayhem"
 HEIGHT = 480
 WIDTH = 720
-FPS = 60
+FPS = 30
 
 # colours
 BLACK = (0, 0, 0)
@@ -17,8 +17,8 @@ BLUE = (0, 0, 255)
 PLATFORM_COLOR = GREEN
 PLATFORM_LIST = [
     ((WIDTH / 2, HEIGHT - 100), (WIDTH - 200, 20)),
-    ((150, HEIGHT - 250), (200, 20)),
-    ((WIDTH - 150, HEIGHT - 250), (200, 20))
+    ((150, HEIGHT - 200), (200, 20)),
+    ((WIDTH - 150, HEIGHT - 200), (200, 20))
     ]
 
 # player properties
@@ -26,11 +26,12 @@ PLAYER_ACC = 0.85
 PLAYER_MAX_VEL = 4
 PLAYER_FRICTION = -0.25
 PLAYER_GRAVITY = 0.3
-PLAYER_JUMP_HEIGHT = -11
+PLAYER_JUMP_HEIGHT = -8
+PLAYER_ANIMATION_FPS = 10
 
 # player 1 properties
-PLAYER_1_COLOR = RED
-PLAYER_1_SPAWN_POINT = (100, 0)
+PLAYER_1_COLOR = GREEN
+PLAYER_1_SPAWN_POINT = (WIDTH - 100, 0)
 
 # player 1 controls
 PLAYER_1_UP = K_UP
@@ -39,8 +40,8 @@ PLAYER_1_LEFT = K_LEFT
 PLAYER_1_RIGHT = K_RIGHT
 
 # player 2 properties
-PLAYER_2_COLOR = BLUE
-PLAYER_2_SPAWN_POINT = (WIDTH - 100, 0)
+PLAYER_2_COLOR = RED
+PLAYER_2_SPAWN_POINT = (100, 0)
 
 # player 2 controls
 PLAYER_2_UP = K_w

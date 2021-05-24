@@ -18,6 +18,6 @@ class Spritesheet:
         image.blit(self.sheet, (0, 0), rect)
         return image
 
-    def get_images(self, rects: tuple[pygame.Rect]) -> tuple[pygame.Surface]:
+    def get_images(self, rects: "list[pygame.Rect]") -> "list[pygame.Surface]":
         """Returns a tuple of pygame.Surface objects from a input tuple of pygame.Rect."""
-        return (self.get_image(rect) for rect in rects)
+        return [self.get_image(rect) for rect in rects]

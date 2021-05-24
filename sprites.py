@@ -1,20 +1,24 @@
 import pygame
 import settings
 import controls
+import itertools
 
 # aliases
 Vector = pygame.math.Vector2
 Sprite = pygame.sprite.Sprite
 
+
 class Animation():
-    def __init__(self, idle):
-        self.idle = idle
+    def __init__(self, idle: "tuple[pygame.Surface]", run: "tuple[pygame.Surface]", jump: "tuple[pygame.Surface]"):
+        self.idle = itertools.cycle(idle)
+        self.run = itertools.cycle(run)
+        self.jump = jump
 
 
 class Player(Sprite):
     """A class for players."""
 
-    def __init__(self, controls: controls.KeyboardControl, spawn_point: tuple, animation: Animation) -> None:
+    def __init__(self, controls: controls.KeyboardControl, spawn_point: tuple, animation: Animation, direction="right") -> None:
         """
         Initializes the Player object.
 
@@ -28,11 +32,19 @@ class Player(Sprite):
         self.set_image()
         self.set_vectors(spawn_point)
         self.set_rect()
+        self.set_mask()
+
+        self.direction = direction
 
         self.spawn_point = spawn_point
         self.controls = controls
         self.falling = True
         self.standing = False
+
+        self.animation_tick = itertools.cycle(range(settings.FPS//settings.PLAYER_ANIMATION_FPS))
+
+    def set_mask(self):
+        self.mask = pygame.mask.from_surface(self.image)
 
     def set_rect(self):
         self.rect = self.image.get_rect()
@@ -44,15 +56,35 @@ class Player(Sprite):
         self.acc = Vector(0, 0)
 
     def set_image(self):
-        # self.image = pygame.Surface((20, 40))
-        # self.image.fill(color)
-        self.image = self.animation.idle
+        self.image = next(self.animation.idle)
 
     def update(self):
-        self.update_acc()
+        self.handle_keys()
         self.apply_friction()
         self.update_velocity()
         self.update_position()
+        self.update_image()
+        self.set_mask()
+
+    def update_image(self):
+        if not self.standing:
+            if self.falling:
+                self.image = self.animation.jump[0]
+            else:
+                self.image = self.animation.jump[1]
+            self.flip_if_necessary()
+        else:
+            if next(self.animation_tick) == 0:
+                if self.vel.x == 0:
+                    self.image = next(self.animation.idle)
+                else:
+                    self.image = next(self.animation.run)
+                self.flip_if_necessary()
+
+    def flip_if_necessary(self):
+        if self.direction == "left":
+            self.image = pygame.transform.flip(self.image, True, False)
+
 
     def update_position(self):
         # update position
@@ -73,27 +105,29 @@ class Player(Sprite):
                 self.vel.x = settings.PLAYER_MAX_VEL
 
     def apply_friction(self):
+        # glitch fix
+        if abs(self.vel.x) < 0.3:
+            self.vel.x = 0
+
         if self.vel.x != 0:
             # check direcition of velocity
             if self.vel.x < 0:
                 self.acc.x -= settings.PLAYER_FRICTION
             else:
                 self.acc.x += settings.PLAYER_FRICTION
-        '''
-        # model horizontal friction as proportional to velocity (similar to fluid resistance)
-        # this will result in a logarithmic shape of velocity/time graph
-        # maximum speed can thus be limited in a smooth way
-        # F_net = ma, m = 1 unit -> a = F_applied + F_friction
-        self.acc.x += self.vel.x * PLAYER_FRICTION
-        '''
 
-    def update_acc(self):
+    def handle_keys(self):
         self.acc = Vector(0, settings.PLAYER_GRAVITY)
         keys = pygame.key.get_pressed()
+        if keys[self.controls.UP] and self.standing:
+            self.vel.y = settings.PLAYER_JUMP_HEIGHT
+            self.standing = False
         if keys[self.controls.LEFT]:
             self.acc.x = -settings.PLAYER_ACC
+            self.direction = "left"
         elif keys[self.controls.RIGHT]:
             self.acc.x = settings.PLAYER_ACC
+            self.direction = "right"
 
     def jump(self):
         if self.standing:
@@ -118,6 +152,7 @@ class Platform(Sprite):
         super().__init__()
         self.set_image(dimensions, color)
         self.set_rect(coordinates)
+        self.mask = pygame.mask.from_surface(self.image)
 
     def set_rect(self, coordinates):
         self.rect = self.image.get_rect()

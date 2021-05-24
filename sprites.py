@@ -140,7 +140,7 @@ class Player(Sprite):
 class Platform(Sprite):
     """A class for platforms."""
 
-    def __init__(self, image: pygame.Surface, coordinates: tuple, tile_count) -> None:
+    def __init__(self, image: pygame.Surface, coordinates: tuple, tile_count: int) -> None:
         """
         Initializes the Platform object.
 
@@ -161,50 +161,55 @@ class Platform(Sprite):
         self.set_rect(coordinates)
         self.mask = pygame.mask.from_surface(self.image)
 
-    def create_surface(self, h, w):
+    def create_surface(self, h: int, w: int):
         width = w * self.count
         self.image = pygame.Surface((width, h))
         self.image.fill((255, 0, 0))
 
-    def blit_tiles(self, image, w):
+    def blit_tiles(self, image: pygame.Surface, w: int):
         x = 0
         for i in range(self.count):
             self.image.blit(image, (x, 0))
             x += w
 
-    def set_rect(self, coordinates):
+    def set_rect(self, coordinates: tuple):
         self.rect = self.image.get_rect()
         self.rect.center = coordinates
 
 
 class Bullet(Sprite):
-    def __init__(self, player_pos, x_vel, image, author):
+    def __init__(self, player_pos: tuple, x_vel: int, image: pygame.Surface, author: object):
         super().__init__()
+        self.author = author
 
         self.image = image
         self.mask = pygame.mask.from_surface(self.image)
 
+        self.set_vectors(player_pos, x_vel)
+        self.set_rect()
+
+    def set_vectors(self, player_pos, x_vel):
         player_x, player_y = player_pos
-
-        x_offset = settings.BULLET_OFFSET_X
-        y_offset = settings.BULLET_OFFSET_Y
-
-        # check if player was moving
-        if abs(x_vel) > settings.BULLET_SPEED:
-            # add additonal offset due to change in height
-            y_offset += settings.ADDITIONAL_BULLET_OFFSET
-
-        if x_vel < 0:
-            self.image = pygame.transform.flip(self.image, True, False)
-            x_offset *= -1  # flip x-offset
+        x_offset, y_offset = self.get_offset(x_vel)
 
         self.pos = Vector(player_x + x_offset, player_y + y_offset)
         self.vel = Vector(x_vel, 0)
 
+    def get_offset(self, x_vel: int) -> tuple:
+        x_offset = settings.BULLET_OFFSET_X
+        y_offset = settings.BULLET_OFFSET_Y
+        # check if player was moving
+        if abs(x_vel) > settings.BULLET_SPEED:
+            # add additonal offset due to change in height
+            y_offset += settings.ADDITIONAL_BULLET_OFFSET
+        if x_vel < 0:
+            self.image = pygame.transform.flip(self.image, True, False)
+            x_offset *= -1  # flip x-offset
+        return (x_offset, y_offset)
+
+    def set_rect(self):
         self.rect = self.image.get_rect()
         self.rect.midbottom = self.pos
-
-        self.author = author
 
     def update(self):
         self.pos.x += self.vel.x

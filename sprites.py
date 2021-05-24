@@ -29,7 +29,7 @@ class Animation():
 class Player(Sprite):
     """A class for players."""
 
-    def __init__(self, controls: controls.KeyboardControl, spawn_point: tuple, animation: Animation, direction="right") -> None:
+    def __init__(self, controls: controls.KeyboardControl, spawn_point: tuple, animation: Animation, direction, muzzle_flash: pygame.Surface) -> None:
         """
         Initializes the Player object.
 
@@ -53,8 +53,14 @@ class Player(Sprite):
         self.falling = True
         self.standing = False
 
-        self.animation_tick = itertools.cycle(
-            range(settings.FPS//settings.PLAYER_ANIMATION_FPS))
+        self.respawn_count = 0
+
+        ticks_per_frame = settings.FPS // settings.PLAYER_ANIMATION_FPS
+        self.animation_tick = itertools.cycle(range(ticks_per_frame))
+
+        # self.muzzle_flash_tick = itertools.cycle(range(1, 0, -1))
+        self.muzzle_flash = muzzle_flash
+        self.shooting = False
 
     def set_mask(self):
         self.mask = pygame.mask.from_surface(self.image)
@@ -88,16 +94,33 @@ class Player(Sprite):
                 self.image = self.animation.jump[0]
             else:
                 self.image = self.animation.jump[1]
-            self.flip_if_necessary()
-        else:
-            if next(self.animation_tick) == 0:
-                if self.vel.x == 0:
-                    self.image = next(self.animation.idle)
-                else:
-                    self.image = next(self.animation.run)
-                self.flip_if_necessary()
 
-    def flip_if_necessary(self):
+            self.blit_muzzle_flash_if_shooting()
+            self.flip_if_facing_left()
+
+        elif next(self.animation_tick) == 0:
+            # if signs of acc and vel are same, then player is running
+            if self.acc.x * self.vel.x > 0:
+                self.image = next(self.animation.run)
+            else:
+                self.image = next(self.animation.idle)
+
+            self.blit_muzzle_flash_if_shooting()
+            self.flip_if_facing_left()
+
+    def blit_muzzle_flash_if_shooting(self):
+        if self.shooting:
+            self.image = self.image.copy()
+            x_offset = settings.MUZZLE_FLASH_OFFSET_X
+            y_offset = settings.MUZZLE_FLASH_OFFSET_Y
+            if self.vel.x != 0 and self.standing:
+                y_offset += settings.MUZZLE_FLASH_RUNNING_OFFSET_Y
+            
+            self.image.blit(self.muzzle_flash, (x_offset, y_offset))
+            #if next(self.muzzle_flash_tick) == 1:
+            self.shooting = False
+
+    def flip_if_facing_left(self):
         if self.direction == "left":
             self.image = pygame.transform.flip(self.image, True, False)
 
@@ -144,6 +167,7 @@ class Player(Sprite):
         self.pos = self.spawn_point
         self.direction = self.spawn_direction
         self.vel.x, self.vel.y = 0, 0
+        self.respawn_count += 1
 
 
 class Platform(Sprite):
@@ -188,6 +212,7 @@ class Platform(Sprite):
 
 class Bullet(Sprite):
     """A class for bullets."""
+
     def __init__(self, player_pos: tuple, x_vel: int, image: pygame.Surface, author: object) -> None:
         """
         Initializes the Bullet object.
@@ -220,7 +245,7 @@ class Bullet(Sprite):
         # check if player was moving
         if abs(x_vel) > settings.BULLET_SPEED:
             # add additonal offset due to change in height
-            y_offset += settings.ADDITIONAL_BULLET_OFFSET
+            y_offset += settings.BULLET_RUNNING_OFFSET_Y
         if x_vel < 0:
             self.image = pygame.transform.flip(self.image, True, False)
             x_offset *= -1  # flip x-offset
@@ -237,3 +262,28 @@ class Bullet(Sprite):
         # check if outside of screen
         if not (0 <= self.pos.x <= settings.WIDTH):
             self.kill()  # delete from all groups
+
+
+class MuzzleFlash(Sprite):
+    def __init__(self, image: pygame.Surface, position: tuple, direction):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect()
+
+        x, y = position
+        x_offset = settings.BULLET_OFFSET_X
+        y_offset = settings.BULLET_OFFSET_Y
+
+        if direction == "left":
+            x_offset *= -1  # flip offset
+            self.image = pygame.transform.flip(
+                self.image, True, False)  # flip image
+
+        self.rect.center = (x + x_offset, y + y_offset)
+
+        self.lifetime = 5
+
+    def update(self):
+        self.lifetime -= 1
+        if self.lifetime == 0:
+            self.kill()

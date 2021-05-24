@@ -98,14 +98,16 @@ class Game:
             controls.PLAYER_1_CONTROLS,
             settings.PLAYER_1_SPAWN_POINT,
             player_1_animations,
-            settings.PLAYER_1_SPAWN_DIRECTION
+            settings.PLAYER_1_SPAWN_DIRECTION,
+            self.muzzle_flash
         )
 
         self.player_2 = sprites.Player(
             controls.PLAYER_2_CONTROLS,
             settings.PLAYER_2_SPAWN_POINT,
             player_2_animations,
-            settings.PLAYER_2_SPAWN_DIRECTION
+            settings.PLAYER_2_SPAWN_DIRECTION,
+            self.muzzle_flash
         )
 
         self.players.add(self.player_1)
@@ -129,12 +131,23 @@ class Game:
                 self.playing = False
                 self.running = False
             elif event.type == pygame.KEYDOWN:
+                for player in self.players:
+                    if event.key == player.controls.SHOOT:
+                        self.fire_bullet(player)
+                
+                '''
                 if event.key == settings.PLAYER_1_SHOOT:
                     self.add_bullet(self.player_1)
                     self.add_recoil(self.player_1)
                 elif event.key == settings.PLAYER_2_SHOOT:
                     self.add_bullet(self.player_2)
                     self.add_recoil(self.player_2)
+                '''
+
+    def fire_bullet(self, player):
+        player.shooting = True
+        self.add_bullet(player)
+        self.add_recoil(player)
 
     def add_recoil(self, player):
         if player.direction == "left":
@@ -149,6 +162,8 @@ class Game:
             "assets/platform/platform.png").convert()
         self.background = pygame.image.load(
             "assets/background/night.png").convert()
+        self.muzzle_flash = pygame.image.load(
+            "assets/misc/muzzle_flash.png").convert_alpha()
 
     def add_bullet(self, player):
         x_vel = settings.BULLET_SPEED + player.vel.x

@@ -4,6 +4,9 @@
 # VSCode
 .vscode/settings.json
 
+# Working files
+__working_files__
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

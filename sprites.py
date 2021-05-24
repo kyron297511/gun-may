@@ -9,7 +9,9 @@ Sprite = pygame.sprite.Sprite
 
 
 class Animation():
-    def __init__(self, idle: "tuple[pygame.Surface]", run: "tuple[pygame.Surface]", jump: "tuple[pygame.Surface]"):
+    """A class for player animations."""
+
+    def __init__(self, idle: tuple[pygame.Surface], run: tuple[pygame.Surface], jump: tuple[pygame.Surface]):
         self.idle = itertools.cycle(idle)
         self.run = itertools.cycle(run)
         self.jump = jump
@@ -34,6 +36,7 @@ class Player(Sprite):
         self.set_rect()
         self.set_mask()
 
+        self.spawn_direction = direction
         self.direction = direction
 
         self.spawn_point = spawn_point
@@ -41,7 +44,8 @@ class Player(Sprite):
         self.falling = True
         self.standing = False
 
-        self.animation_tick = itertools.cycle(range(settings.FPS//settings.PLAYER_ANIMATION_FPS))
+        self.animation_tick = itertools.cycle(
+            range(settings.FPS//settings.PLAYER_ANIMATION_FPS))
 
     def set_mask(self):
         self.mask = pygame.mask.from_surface(self.image)
@@ -66,6 +70,9 @@ class Player(Sprite):
         self.update_image()
         self.set_mask()
 
+        if self.pos.y > settings.VOID_HEIGHT:
+            self.respawn()
+
     def update_image(self):
         if not self.standing:
             if self.falling:
@@ -85,7 +92,6 @@ class Player(Sprite):
         if self.direction == "left":
             self.image = pygame.transform.flip(self.image, True, False)
 
-
     def update_position(self):
         # update position
         # Δd = v_2Δt - (1/2)aΔt^2, Δt = 1 tick -> Δd = v_2 - 0.5a
@@ -98,23 +104,15 @@ class Player(Sprite):
         # update new velocity
         # v_2 = v_1 + aΔt, Δt = 1 tick -> v_2 = v_1 + a
         self.vel += self.acc
-        if abs(self.vel.x) > settings.PLAYER_MAX_VEL:
-            if self.vel.x < 0:
-                self.vel.x = -settings.PLAYER_MAX_VEL
-            else:
-                self.vel.x = settings.PLAYER_MAX_VEL
 
-    def apply_friction(self):
-        # glitch fix
-        if abs(self.vel.x) < 0.3:
+        # fixes perpetual running
+        if abs(self.vel.x) < 0.4:
             self.vel.x = 0
 
-        if self.vel.x != 0:
-            # check direcition of velocity
-            if self.vel.x < 0:
-                self.acc.x -= settings.PLAYER_FRICTION
-            else:
-                self.acc.x += settings.PLAYER_FRICTION
+    def apply_friction(self):
+        # model friction as proportional to player speed
+        # this limits max speed
+        self.acc.x += self.vel.x * settings.PLAYER_FRICTION
 
     def handle_keys(self):
         self.acc = Vector(0, settings.PLAYER_GRAVITY)
@@ -135,38 +133,83 @@ class Player(Sprite):
 
     def respawn(self):
         self.pos = self.spawn_point
+        self.direction = self.spawn_direction
+        self.vel.x, self.vel.y = 0, 0
 
 
 class Platform(Sprite):
     """A class for platforms."""
 
-    def __init__(self, coordinates: tuple, dimensions: tuple, color=settings.GREEN) -> None:
+    def __init__(self, image: pygame.Surface, coordinates: tuple, tile_count) -> None:
         """
         Initializes the Platform object.
 
         Parameters:
-        coordinates (tuple): coordinates (x, y) representing the center of the platform.
-        dimensions (tuple): values (width, height). 
-        Optional: color (tuple): values (R, G, B).
+        image (pygame.Surface): a surface representing one tile.
+        coordinates (tuple): (x, y) representing the center of the platform.
+        tile_count (int): number of tiles the platform contains.
         """
         super().__init__()
-        self.set_image(dimensions, color)
+        self.count = tile_count
+
+        h = image.get_height()
+        w = image.get_width()
+
+        self.create_surface(h, w)
+        self.blit_tiles(image, w)
+
         self.set_rect(coordinates)
         self.mask = pygame.mask.from_surface(self.image)
+
+    def create_surface(self, h, w):
+        width = w * self.count
+        self.image = pygame.Surface((width, h))
+        self.image.fill((255, 0, 0))
+
+    def blit_tiles(self, image, w):
+        x = 0
+        for i in range(self.count):
+            self.image.blit(image, (x, 0))
+            x += w
 
     def set_rect(self, coordinates):
         self.rect = self.image.get_rect()
         self.rect.center = coordinates
 
-    def set_image(self, dimensions, color):
-        self.image = pygame.Surface(dimensions)
-        self.image.fill(color)
-
 
 class Bullet(Sprite):
-    def __init__(self, velocity, coordinates):
+    def __init__(self, player_pos, x_vel, image, author):
         super().__init__()
-        self.image = pygame.Surface((10, 5))
-        self.image.fill(settings.WHITE)
+
+        self.image = image
+        self.mask = pygame.mask.from_surface(self.image)
+
+        player_x, player_y = player_pos
+
+        x_offset = settings.BULLET_OFFSET_X
+        y_offset = settings.BULLET_OFFSET_Y
+
+        # check if player was moving
+        if abs(x_vel) > settings.BULLET_SPEED:
+            # add additonal offset due to change in height
+            y_offset += settings.ADDITIONAL_BULLET_OFFSET
+
+        if x_vel < 0:
+            self.image = pygame.transform.flip(self.image, True, False)
+            x_offset *= -1  # flip x-offset
+
+        self.pos = Vector(player_x + x_offset, player_y + y_offset)
+        self.vel = Vector(x_vel, 0)
+
         self.rect = self.image.get_rect()
-        self.rect.center = coordinates
+        self.rect.midbottom = self.pos
+
+        self.author = author
+
+    def update(self):
+        self.pos.x += self.vel.x
+        self.rect.center = self.pos
+
+        # check if outside of screen
+        if not (0 <= self.pos.x <= settings.WIDTH):
+            self.kill()  # delete from all groups

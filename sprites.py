@@ -178,7 +178,17 @@ class Platform(Sprite):
 
 
 class Bullet(Sprite):
-    def __init__(self, player_pos: tuple, x_vel: int, image: pygame.Surface, author: object):
+    """A class for bullets."""
+    def __init__(self, player_pos: tuple, x_vel: int, image: pygame.Surface, author: object) -> None:
+        """
+        Initializes the Bullet object.
+
+        Parameters:
+        player_pos (tuple): the position of the player when the bullet was fired.
+        x_vel (int): the velocity of the bullet.
+        image (pygame.Surface): the image of the bullet.
+        author (object): the player who fired the bullet.
+        """
         super().__init__()
         self.author = author
 
@@ -188,7 +198,7 @@ class Bullet(Sprite):
         self.set_vectors(player_pos, x_vel)
         self.set_rect()
 
-    def set_vectors(self, player_pos, x_vel):
+    def set_vectors(self, player_pos: tuple, x_vel: int) -> None:
         player_x, player_y = player_pos
         x_offset, y_offset = self.get_offset(x_vel)
 

@@ -21,7 +21,8 @@ BLUE = (0, 0, 255)
 PLATFORM_LIST = [
     ((WIDTH / 2, HEIGHT - 100), 16),
     ((200, HEIGHT - 200), 8),
-    ((WIDTH - 200, HEIGHT - 200), 8)
+    ((WIDTH - 200, HEIGHT - 200), 8),
+    ((WIDTH / 2, HEIGHT - 300), 10)
 ]
 
 # player properties

@@ -1,7 +1,10 @@
 import pygame
+import pygame.freetype
 import settings
 import controls
 import itertools
+import copy
+
 
 # aliases
 Vector = pygame.math.Vector2
@@ -21,6 +24,7 @@ class Animation():
             jump[0]: player going up.
             jump[1]: player going down.
         """
+        self.static = idle[0]
         self.idle = itertools.cycle(idle)
         self.run = itertools.cycle(run)
         self.jump = jump
@@ -29,11 +33,12 @@ class Animation():
 class Player(Sprite):
     """A class for players."""
 
-    def __init__(self, controls: controls.KeyboardControl, spawn_point: tuple, animation: Animation, direction, muzzle_flash: pygame.Surface) -> None:
+    def __init__(self, name: str, controls: controls.KeyboardControl, spawn_point: tuple, animation: Animation, direction, muzzle_flash: pygame.Surface) -> None:
         """
         Initializes the Player object.
 
         Parameters:
+        name (str): the name of the player.
         controls (KeyboardControl): player keyboard control settings.
         spawn_point (tuple): coordinates (x, y) where player will be created.
         animations (Animation): contains images that represent the player's visual appearance.
@@ -61,6 +66,8 @@ class Player(Sprite):
         # self.muzzle_flash_tick = itertools.cycle(range(1, 0, -1))
         self.muzzle_flash = muzzle_flash
         self.shooting = False
+
+        self.name = name
 
     def set_mask(self):
         self.mask = pygame.mask.from_surface(self.image)
@@ -113,7 +120,7 @@ class Player(Sprite):
             self.image = self.image.copy()
             x_offset = settings.MUZZLE_FLASH_OFFSET_X
             y_offset = settings.MUZZLE_FLASH_OFFSET_Y
-            if self.vel.x != 0 and self.standing:
+            if self.acc.x * self.vel.x > 0 and self.standing:
                 y_offset += settings.MUZZLE_FLASH_RUNNING_OFFSET_Y
 
             self.image.blit(self.muzzle_flash, (x_offset, y_offset))
@@ -262,3 +269,55 @@ class Bullet(Sprite):
         # check if outside of screen
         if not (0 <= self.pos.x <= settings.WIDTH):
             self.kill()  # delete from all groups
+
+
+class Scoreboard(Sprite):
+    def __init__(self, font: pygame.freetype.Font, color: tuple, position: tuple, player: object):
+        super().__init__()
+        self.player = player
+        self.pos = position
+        self.font = font
+        self.color = color
+
+        # must create a copy of the idle animation to prevent modifying the original object,
+        # which will cause the animation to speed up as it will be iterated two times per tick
+        self.icon_animation = copy.copy(player.animation.idle)
+
+        ticks_per_frame = settings.FPS // settings.PLAYER_ANIMATION_FPS
+        self.animation_ticker = itertools.cycle(range(ticks_per_frame))
+
+        self.set_image()
+
+    def set_image(self):
+        line_1 = self.font.render(self.player.name, self.color)[0]
+        line_2 = self.font.render("Deaths: {}".format(
+            self.player.respawn_count), self.color)[0]
+
+        line_space = 10
+        default_width = 100
+        line_1_height = line_1.get_height()
+
+        if next(self.animation_ticker) == 0:
+            self.icon = next(self.icon_animation)
+        icon_width = self.icon.get_width()
+        icon_height = self.icon.get_height()
+
+        width = icon_width + \
+            max(default_width, line_1.get_width(), line_2.get_width())
+        height = max(icon_height, line_1_height +
+                     line_2.get_height() + line_space)
+
+        self.image = pygame.Surface((width, height))
+
+        self.image.blit(self.icon, (0, 0))
+
+        self.image.blit(line_1, (icon_width, 0))
+        self.image.blit(line_2, (icon_width, line_1_height + line_space))
+
+        self.image.set_colorkey((0, 0, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.midbottom = self.pos
+
+    def update(self):
+        self.set_image()

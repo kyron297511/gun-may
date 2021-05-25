@@ -1,4 +1,5 @@
 import pygame
+import pygame.freetype
 import settings
 import sprites
 import spritesheet
@@ -25,9 +26,24 @@ class Game:
         self.all_sprites = pygame.sprite.Group()
 
         self.load_images()
+        self.load_font()
         self.add_platforms()
         self.add_players()
+        self.add_scoreboards()
         self.run()
+
+    def load_font(self):
+        self.font = pygame.freetype.Font(
+            "assets/font/OpenSans-Regular.ttf", 16)
+
+    def add_scoreboards(self):
+        self.add_scoreboard(self.player_1, settings.WIDTH - 175, settings.HEIGHT - 20)
+        self.add_scoreboard(self.player_2, 175, settings.HEIGHT - 20)
+
+    def add_scoreboard(self, player, x, y):
+        scoreboard = sprites.Scoreboard(
+            self.font, settings.WHITE, (x, y), player)
+        self.all_sprites.add(scoreboard)
 
     def add_platforms(self):
         """Creates and adds platforms to self.platforms and self.all_sprites."""
@@ -95,6 +111,7 @@ class Game:
             settings.PLAYER_2_COLOR)
 
         self.player_1 = sprites.Player(
+            "Player 1",
             controls.PLAYER_1_CONTROLS,
             settings.PLAYER_1_SPAWN_POINT,
             player_1_animations,
@@ -103,6 +120,7 @@ class Game:
         )
 
         self.player_2 = sprites.Player(
+            "Player 2",
             controls.PLAYER_2_CONTROLS,
             settings.PLAYER_2_SPAWN_POINT,
             player_2_animations,
@@ -134,7 +152,7 @@ class Game:
                 for player in self.players:
                     if event.key == player.controls.SHOOT:
                         self.fire_bullet(player)
-                
+
                 '''
                 if event.key == settings.PLAYER_1_SHOOT:
                     self.add_bullet(self.player_1)

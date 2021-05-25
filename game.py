@@ -34,19 +34,30 @@ class Game:
         self.run()
 
     def load_and_set_icon(self):
+        """Loads surface from image file from disk and sets it as the game icon."""
         icon = pygame.image.load("assets/icon/icon.png")
         pygame.display.set_icon(icon)
 
     def load_font(self):
+        """Loads font from file and sets it to self.font"""
         self.font = pygame.freetype.Font(
             "assets/font/OpenSans-Regular.ttf", 16)
 
     def add_scoreboards(self):
+        """Creates two scoreboard sprites at their proper locations and adds them to the all_sprites group."""
         self.add_scoreboard(self.player_1, settings.WIDTH -
                             175, settings.HEIGHT - 20)
         self.add_scoreboard(self.player_2, 175, settings.HEIGHT - 20)
 
-    def add_scoreboard(self, player, x, y):
+    def add_scoreboard(self, player: sprites.Player, x: int, y: int) -> None:
+        """
+        Creates a single scoreboard and adds it to the all_sprites group.
+
+        Parameters:
+        player (sprites.Player): the player the scoreboard belongs to.
+        x (int): the x coordinate of the center of the scoreboard.
+        y (int): the y coordinate of the center of the scoreboard.
+        """
         scoreboard = sprites.Scoreboard(
             self.font, settings.WHITE, (x, y), player)
         self.all_sprites.add(scoreboard)
@@ -63,8 +74,13 @@ class Game:
             self.platforms.add(platform)
             self.all_sprites.add(platform)
 
-    def parse_spritesheet_json(self, file_path) -> list[pygame.Rect]:
-        """Returns a list of pygame.Rect objects representing each individaul frame of the sprite sheet."""
+    def parse_spritesheet_json(self, file_path: str) -> list[pygame.Rect]:
+        """
+        Returns a list of pygame.Rect objects representing each individaul frame of the sprite sheet.
+
+        Parameters:
+        file_path (str): path to json file containing spritesheet information.
+        """
         with open(file_path) as f:
             data = json.load(f)
         frame_names = tuple(data["frames"].keys())
@@ -159,27 +175,33 @@ class Game:
                     if event.key == player.controls.SHOOT:
                         self.fire_bullet(player)
 
-                '''
-                if event.key == settings.PLAYER_1_SHOOT:
-                    self.add_bullet(self.player_1)
-                    self.add_recoil(self.player_1)
-                elif event.key == settings.PLAYER_2_SHOOT:
-                    self.add_bullet(self.player_2)
-                    self.add_recoil(self.player_2)
-                '''
+    def fire_bullet(self, player: sprites.Player) -> None:
+        """
+        Creates a bullet on the screen and adds recoil effect to the player.
+        
+        Parameters:
+        player (sprites.Player): the player that shot the bullet.
+        """
 
-    def fire_bullet(self, player):
         player.shooting = True
         self.add_bullet(player)
         self.add_recoil(player)
 
-    def add_recoil(self, player):
+    def add_recoil(self, player: sprites.Player) -> None:
+        """
+        Changes the velocity of the player according to the recoil settings.
+
+        Parameters:
+        player (sprites.Player): the player to add the recoil effect to.
+        """
+        
         if player.direction == "left":
             player.vel.x += settings.GUN_RECOIL
         else:
             player.vel.x += -settings.GUN_RECOIL
 
     def load_images(self):
+        """Loads necessary images from file, converts them to surfaces, and stores them in appropriate variables."""
         self.bullet_image = pygame.image.load(
             "assets/bullet/bullet.png").convert()
         self.platform_image = pygame.image.load(
@@ -189,7 +211,13 @@ class Game:
         self.muzzle_flash = pygame.image.load(
             "assets/misc/muzzle_flash.png").convert_alpha()
 
-    def add_bullet(self, player):
+    def add_bullet(self, player: sprites.Player) -> None:
+        """
+        Creates a bullet on the screen with the appropriate velocity.
+
+        Parameters:
+        player (sprites.Player): the player that shot the bullet.
+        """
         x_vel = settings.BULLET_SPEED + player.vel.x
         if player.direction == "left":
             x_vel = -settings.BULLET_SPEED + player.vel.x
@@ -199,10 +227,12 @@ class Game:
         self.all_sprites.add(bullet)
 
     def update(self):
+        """Updates all sprites."""
         self.all_sprites.update()
         self.handle_collisions()
 
     def handle_collisions(self):
+        """Checks and handles player collisions with platforms and bullets."""
         for player in self.players:
             platform_collisions = pygame.sprite.spritecollide(
                 player, self.platforms, False, pygame.sprite.collide_mask)

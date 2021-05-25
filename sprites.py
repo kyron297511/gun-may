@@ -62,7 +62,6 @@ class Player(Sprite):
         ticks_per_frame = settings.FPS // settings.PLAYER_ANIMATION_FPS
         self.animation_tick = itertools.cycle(range(ticks_per_frame))
 
-        # self.muzzle_flash_tick = itertools.cycle(range(1, 0, -1))
         self.muzzle_flash = muzzle_flash
         self.shooting = False
 

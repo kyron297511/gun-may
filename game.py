@@ -12,6 +12,7 @@ class Game:
         """Initializes pygame."""
         pygame.init()
         pygame.mixer.init()
+        self.load_and_set_icon()
         self.screen = pygame.display.set_mode(
             (settings.WIDTH, settings.HEIGHT))
         pygame.display.set_caption(settings.TITLE)
@@ -32,12 +33,17 @@ class Game:
         self.add_scoreboards()
         self.run()
 
+    def load_and_set_icon(self):
+        icon = pygame.image.load("assets/icon/icon.png")
+        pygame.display.set_icon(icon)
+
     def load_font(self):
         self.font = pygame.freetype.Font(
             "assets/font/OpenSans-Regular.ttf", 16)
 
     def add_scoreboards(self):
-        self.add_scoreboard(self.player_1, settings.WIDTH - 175, settings.HEIGHT - 20)
+        self.add_scoreboard(self.player_1, settings.WIDTH -
+                            175, settings.HEIGHT - 20)
         self.add_scoreboard(self.player_2, 175, settings.HEIGHT - 20)
 
     def add_scoreboard(self, player, x, y):
@@ -230,11 +236,13 @@ class Game:
         """Close pygame."""
         pygame.quit()
 
+
 def main():
     game = Game()
     while game.running:
         game.new()
     game.quit()
+
 
 if __name__ == "__main__":
     main()

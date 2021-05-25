@@ -229,3 +229,12 @@ class Game:
     def quit(self):
         """Close pygame."""
         pygame.quit()
+
+def main():
+    game = Game()
+    while game.running:
+        game.new()
+    game.quit()
+
+if __name__ == "__main__":
+    main()

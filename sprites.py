@@ -24,7 +24,6 @@ class Animation():
             jump[0]: player going up.
             jump[1]: player going down.
         """
-        self.static = idle[0]
         self.idle = itertools.cycle(idle)
         self.run = itertools.cycle(run)
         self.jump = jump

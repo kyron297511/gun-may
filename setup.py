@@ -13,7 +13,7 @@ if sys.platform == "win32":
 setup(
     name = "gun-mayhem",
     version = "0.1",
-    description = "My GUI application!",
+    description = "Gun Mayhem!",
     options = {"build_exe": build_exe_options},
     executables = [Executable("game.py", base=base, icon="assets/icon/icon.png")]
 )

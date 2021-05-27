@@ -22,7 +22,7 @@ PLATFORM_LIST = [
     ((WIDTH / 2, HEIGHT - 100), 16),
     ((200, HEIGHT - 200), 8),
     ((WIDTH - 200, HEIGHT - 200), 8),
-    ((WIDTH / 2, HEIGHT - 300), 10)
+    ((WIDTH / 2, HEIGHT - 310), 10)
 ]
 
 # player properties
@@ -43,7 +43,7 @@ PLAYER_1_UP = K_UP
 PLAYER_1_DOWN = K_DOWN
 PLAYER_1_LEFT = K_LEFT
 PLAYER_1_RIGHT = K_RIGHT
-PLAYER_1_SHOOT = K_KP0
+PLAYER_1_SHOOT = K_PERIOD
 
 # player 2 properties
 PLAYER_2_COLOR = "red"
@@ -55,7 +55,7 @@ PLAYER_2_UP = K_w
 PLAYER_2_DOWN = K_s
 PLAYER_2_LEFT = K_a
 PLAYER_2_RIGHT = K_d
-PLAYER_2_SHOOT = K_h
+PLAYER_2_SHOOT = K_g
 
 # gun properties
 GUN_RECOIL = 5

@@ -27,11 +27,22 @@ class Game:
         self.all_sprites = pygame.sprite.Group()
 
         self.load_images()
+        self.load_sfx()
         self.load_font()
         self.add_platforms()
         self.add_players()
         self.add_scoreboards()
         self.run()
+
+    def load_sfx(self):
+        self.sfx = {}
+        sound = pygame.mixer.Sound("assets/sfx/gun/plasma_rife_fire.wav")
+        self.sfx.update({"shoot": sound})
+
+    def sfx_shoot(self):
+        sound = self.sfx.get("shoot")
+        sound.play()
+
 
     def load_and_set_icon(self):
         """Loads surface from image file from disk and sets it as the game icon."""
@@ -185,6 +196,7 @@ class Game:
 
         player.shooting = True
         self.add_bullet(player)
+        self.sfx_shoot()
         self.add_recoil(player)
 
     def add_recoil(self, player: sprites.Player) -> None:

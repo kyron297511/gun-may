@@ -43,7 +43,7 @@ class Game:
         sound.set_volume(0.4)
         self.sfx.update({"shoot": sound})
 
-        sound = Sound("assets/sfx/shooting/hit.wav")
+        sound = Sound("assets/sfx/player/hit.wav")
         sound.set_volume(0.6)
         self.sfx.update({"hit": sound})
 
@@ -51,11 +51,11 @@ class Game:
         sound.set_volume(0.3)
         self.sfx.update({"ambience": sound})
 
-        sound = Sound("assets/sfx/movement/jumping/jump.wav")
+        sound = Sound("assets/sfx/movement/jump.wav")
         sound.set_volume(0.8)
         self.sfx.update({"jump": sound})
 
-        sound = Sound("assets/sfx/movement/running/step.wav")
+        sound = Sound("assets/sfx/movement/step.wav")
         sound.set_volume(0.4)
         self.sfx.update({"step": sound})
 

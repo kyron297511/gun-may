@@ -32,7 +32,7 @@ class Animation():
 class Player(Sprite):
     """A class for players."""
 
-    def __init__(self, name: str, controls: controls.KeyboardControl, spawn_point: tuple, animation: Animation, direction, muzzle_flash: pygame.Surface) -> None:
+    def __init__(self, name: str, controls: controls.KeyboardControl, spawn_point: tuple, animation: Animation, direction, muzzle_flash: pygame.Surface, sfx: dict) -> None:
         """
         Initializes the Player object.
 
@@ -59,13 +59,17 @@ class Player(Sprite):
 
         self.respawn_count = 0
 
-        ticks_per_frame = settings.FPS // settings.PLAYER_ANIMATION_FPS
-        self.animation_tick = itertools.cycle(range(ticks_per_frame))
+        animation_ticks_per_frame = settings.FPS // settings.PLAYER_ANIMATION_FPS
+        sound_ticks_per_frame = animation_ticks_per_frame
+        
+        self.animation_tick = itertools.cycle(range(animation_ticks_per_frame))
+        self.step_tick = itertools.cycle(range(sound_ticks_per_frame))
 
         self.muzzle_flash = muzzle_flash
         self.shooting = False
 
         self.name = name
+        self.sfx = sfx
 
     def set_mask(self):
         self.mask = pygame.mask.from_surface(self.image)
@@ -107,6 +111,8 @@ class Player(Sprite):
             # if signs of acc and vel are same, then player is running
             if self.acc.x * self.vel.x > 0:
                 self.image = next(self.animation.run)
+                if next(self.step_tick) == 0:
+                    self.sfx_step()
             else:
                 self.image = next(self.animation.idle)
 
@@ -122,7 +128,6 @@ class Player(Sprite):
                 y_offset += settings.MUZZLE_FLASH_RUNNING_OFFSET_Y
 
             self.image.blit(self.muzzle_flash, (x_offset, y_offset))
-            # if next(self.muzzle_flash_tick) == 1:
             self.shooting = False
 
     def flip_if_facing_left(self):
@@ -155,20 +160,39 @@ class Player(Sprite):
         self.acc = Vector(0, settings.PLAYER_GRAVITY)
         keys = pygame.key.get_pressed()
         if keys[self.controls.UP] and self.standing:
-            self.vel.y = settings.PLAYER_JUMP_HEIGHT
-            self.standing = False
+            self.jump()
         if keys[self.controls.LEFT]:
-            self.acc.x = -settings.PLAYER_ACC
-            self.direction = "left"
+            self.move_left()
         elif keys[self.controls.RIGHT]:
-            self.acc.x = settings.PLAYER_ACC
-            self.direction = "right"
+            self.move_right()
+
+    def move_right(self):
+        self.acc.x = settings.PLAYER_ACC
+        self.direction = "right"
+
+    def move_left(self):
+        self.acc.x = -settings.PLAYER_ACC
+        self.direction = "left"
 
     def jump(self):
-        if self.standing:
-            self.vel.y = settings.PLAYER_JUMP_HEIGHT
+        self.vel.y = settings.PLAYER_JUMP_HEIGHT
+        self.standing = False
+        self.sfx_jump()
+
+    def sfx_jump(self):
+        sound = self.sfx.get("jump")
+        sound.play()
+
+    def sfx_step(self):
+        sound = self.sfx.get("step")
+        sound.play()
+
+    def sfx_death(self):
+        sound = self.sfx.get("death")
+        sound.play()
 
     def respawn(self):
+        self.sfx_death()
         self.pos = self.spawn_point
         self.direction = self.spawn_direction
         self.vel.x, self.vel.y = 0, 0

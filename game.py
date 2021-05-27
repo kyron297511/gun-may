@@ -35,14 +35,45 @@ class Game:
         self.run()
 
     def load_sfx(self):
+        """Loads sound files from disk and populates a dictionary object with them."""
+        Sound = pygame.mixer.Sound
         self.sfx = {}
-        sound = pygame.mixer.Sound("assets/sfx/gun/plasma_rife_fire.wav")
+
+        sound = Sound("assets/sfx/shooting/plasma_rife_fire.wav")
+        sound.set_volume(0.4)
         self.sfx.update({"shoot": sound})
+
+        sound = Sound("assets/sfx/shooting/hit.wav")
+        sound.set_volume(0.6)
+        self.sfx.update({"hit": sound})
+
+        sound = Sound("assets/sfx/ambience/ambience_spacecraft_loop.wav")
+        sound.set_volume(0.3)
+        self.sfx.update({"ambience": sound})
+
+        sound = Sound("assets/sfx/movement/jumping/jump.wav")
+        sound.set_volume(0.8)
+        self.sfx.update({"jump": sound})
+
+        sound = Sound("assets/sfx/movement/running/step.wav")
+        sound.set_volume(0.4)
+        self.sfx.update({"step": sound})
+
+        sound = Sound("assets/sfx/player/death.wav")
+        sound.set_volume(0.5)
+        self.sfx.update({"death": sound})
 
     def sfx_shoot(self):
         sound = self.sfx.get("shoot")
         sound.play()
 
+    def sfx_hit(self):
+        sound = self.sfx.get("hit")
+        sound.play()
+    
+    def loop_ambience(self):
+        sound = self.sfx.get("ambience")
+        sound.play(loops=-1)
 
     def load_and_set_icon(self):
         """Loads surface from image file from disk and sets it as the game icon."""
@@ -149,7 +180,8 @@ class Game:
             settings.PLAYER_1_SPAWN_POINT,
             player_1_animations,
             settings.PLAYER_1_SPAWN_DIRECTION,
-            self.muzzle_flash
+            self.muzzle_flash,
+            self.sfx
         )
 
         self.player_2 = sprites.Player(
@@ -158,7 +190,8 @@ class Game:
             settings.PLAYER_2_SPAWN_POINT,
             player_2_animations,
             settings.PLAYER_2_SPAWN_DIRECTION,
-            self.muzzle_flash
+            self.muzzle_flash,
+            self.sfx
         )
 
         self.players.add(self.player_1)
@@ -168,6 +201,7 @@ class Game:
 
     def run(self):
         """Starts the game loop."""
+        self.loop_ambience()
         self.playing = True
         while self.playing:
             self.clock.tick(settings.FPS)
@@ -189,7 +223,7 @@ class Game:
     def fire_bullet(self, player: sprites.Player) -> None:
         """
         Creates a bullet on the screen and adds recoil effect to the player.
-        
+
         Parameters:
         player (sprites.Player): the player that shot the bullet.
         """
@@ -206,7 +240,7 @@ class Game:
         Parameters:
         player (sprites.Player): the player to add the recoil effect to.
         """
-        
+
         if player.direction == "left":
             player.vel.x += settings.GUN_RECOIL
         else:
@@ -265,6 +299,7 @@ class Game:
                 bullet = bullet_collisions[0]
                 if bullet.author != player:
                     player.vel.x += bullet.vel.x * settings.KNOCKBACK_MULTIPLIER
+                    self.sfx_hit()
 
     def render(self):
         """Renders a single frame to the display."""

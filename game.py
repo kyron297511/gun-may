@@ -41,27 +41,27 @@ class Game:
 
         sound = Sound("assets/sfx/shooting/plasma_rife_fire.wav")
         sound.set_volume(0.4)
-        self.sfx.update({"shoot": sound})
+        self.sfx["shoot"] = sound
 
         sound = Sound("assets/sfx/player/hit.wav")
         sound.set_volume(0.6)
-        self.sfx.update({"hit": sound})
+        self.sfx["hit"] = sound
 
         sound = Sound("assets/sfx/ambience/ambience_spacecraft_loop.wav")
         sound.set_volume(0.3)
-        self.sfx.update({"ambience": sound})
+        self.sfx["ambience"] = sound
 
         sound = Sound("assets/sfx/movement/jump.wav")
         sound.set_volume(0.8)
-        self.sfx.update({"jump": sound})
-
+        self.sfx["jump"] = sound
+        
         sound = Sound("assets/sfx/movement/step.wav")
         sound.set_volume(0.4)
-        self.sfx.update({"step": sound})
+        self.sfx["step"] = sound
 
         sound = Sound("assets/sfx/player/death.wav")
         sound.set_volume(0.5)
-        self.sfx.update({"death": sound})
+        self.sfx["death"] = sound
 
     def sfx_shoot(self):
         sound = self.sfx.get("shoot")

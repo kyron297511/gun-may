@@ -64,7 +64,7 @@ MUZZLE_FLASH_OFFSET_Y = 17
 MUZZLE_FLASH_RUNNING_OFFSET_Y = -2
 
 # bullet properties
-BULLET_SPEED = 26  # pixels per tick
+BULLET_SPEED = 22  # pixels per tick
 BULLET_OFFSET_X = 16
 BULLET_OFFSET_Y = -27
 BULLET_RUNNING_OFFSET_Y = -2  # for running

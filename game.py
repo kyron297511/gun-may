@@ -8,7 +8,7 @@ import json
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, player_1_name, player_2_name, player_1_color, player_2_color):
         """Initializes pygame."""
         pygame.init()
         pygame.mixer.init()
@@ -18,6 +18,12 @@ class Game:
         pygame.display.set_caption(settings.TITLE)
         self.clock = pygame.time.Clock()
         self.running = True
+
+        # set player names and colors
+        self.player_1_name = player_1_name
+        self.player_2_name = player_2_name
+        self.player_1_color = player_1_color
+        self.player_2_color = player_2_color
 
     def new(self):
         """Starts a new Gun Meyham game."""
@@ -41,27 +47,27 @@ class Game:
 
         sound = Sound("assets/sfx/shooting/plasma_rife_fire.wav")
         sound.set_volume(0.4)
-        self.sfx["shoot"] = sound
+        self.sfx.update({"shoot": sound})
 
         sound = Sound("assets/sfx/player/hit.wav")
         sound.set_volume(0.6)
-        self.sfx["hit"] = sound
+        self.sfx.update({"hit": sound})
 
         sound = Sound("assets/sfx/ambience/ambience_spacecraft_loop.wav")
         sound.set_volume(0.3)
-        self.sfx["ambience"] = sound
+        self.sfx.update({"ambience": sound})
 
         sound = Sound("assets/sfx/movement/jump.wav")
         sound.set_volume(0.8)
-        self.sfx["jump"] = sound
-        
+        self.sfx.update({"jump": sound})
+
         sound = Sound("assets/sfx/movement/step.wav")
         sound.set_volume(0.4)
-        self.sfx["step"] = sound
+        self.sfx.update({"step": sound})
 
         sound = Sound("assets/sfx/player/death.wav")
         sound.set_volume(0.5)
-        self.sfx["death"] = sound
+        self.sfx.update({"death": sound})
 
     def sfx_shoot(self):
         sound = self.sfx.get("shoot")
@@ -170,18 +176,18 @@ class Game:
         """Creates and adds the players to self.players and self.all_sprites."""
 
         player_1_animations = self.get_player_animations(
-            settings.PLAYER_1_COLOR)
+            self.player_1_color)
         player_2_animations = self.get_player_animations(
-            settings.PLAYER_2_COLOR)
+            self.player_2_color)
 
         self.player_1 = sprites.Player(
-            "Player 1",
-            controls.PLAYER_1_CONTROLS,
-            settings.PLAYER_1_SPAWN_POINT,
-            player_1_animations,
-            settings.PLAYER_1_SPAWN_DIRECTION,
-            self.muzzle_flash,
-            self.sfx
+            name=self.player_1_name,
+            controls=controls.PLAYER_1_CONTROLS,
+            spawn_point=settings.PLAYER_1_SPAWN_POINT,
+            animation=player_1_animations,
+            direction=settings.PLAYER_1_SPAWN_DIRECTION,
+            muzzle_flash=self.muzzle_flash,
+            sfx=self.sfx
         )
 
         self.player_2 = sprites.Player(

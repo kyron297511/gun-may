@@ -13,8 +13,8 @@ class Launcher(tk.Tk):
 
         canvas = tk.Canvas(width=562, height=101)
         canvas.grid(row=0, column=0, columnspan=2, padx=20, pady=15)
-        self.title = tk.PhotoImage(file="assets/launcher/title.gif")
-        canvas.create_image(0, 0, anchor="nw", image=self.title)
+        self.image = tk.PhotoImage(file="assets/launcher/title.gif")
+        canvas.create_image(0, 0, anchor="nw", image=self.image)
 
         Label(text="Player 1 controls:").grid(row=1, column=0)
         

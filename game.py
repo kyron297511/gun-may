@@ -1,14 +1,18 @@
-import pygame
+import pygame  # uses Pygame
 import pygame.freetype
-import settings
+import settings  
 import sprites
 import spritesheet
 import controls
-import json
+import json # uses external Python modules
+
+# uses OOP
 
 
 class Game:
-    def __init__(self, player_1_name, player_2_name, player_1_color, player_2_color):
+    """A class for a game of Gun Mayhem."""
+
+    def __init__(self, player_1_name="Player 1", player_2_name="Player 2", player_1_color="green", player_2_color="red"):
         """Initializes pygame."""
         pygame.init()
         pygame.mixer.init()
@@ -42,6 +46,7 @@ class Game:
 
     def load_sfx(self):
         """Loads sound files from disk and populates a dictionary object with them."""
+        # uses files
         Sound = pygame.mixer.Sound
         self.sfx = {}
 
@@ -76,7 +81,7 @@ class Game:
     def sfx_hit(self):
         sound = self.sfx.get("hit")
         sound.play()
-    
+
     def loop_ambience(self):
         sound = self.sfx.get("ambience")
         sound.play(loops=-1)
@@ -133,6 +138,7 @@ class Game:
             data = json.load(f)
         frame_names = tuple(data["frames"].keys())
 
+        # uses arrays
         rect_list = []
         for frame_name in frame_names:
             dimensions = data["frames"][frame_name]["frame"]
@@ -191,13 +197,13 @@ class Game:
         )
 
         self.player_2 = sprites.Player(
-            "Player 2",
-            controls.PLAYER_2_CONTROLS,
-            settings.PLAYER_2_SPAWN_POINT,
-            player_2_animations,
-            settings.PLAYER_2_SPAWN_DIRECTION,
-            self.muzzle_flash,
-            self.sfx
+            name=self.player_2_name,
+            controls=controls.PLAYER_2_CONTROLS,
+            spawn_point=settings.PLAYER_2_SPAWN_POINT,
+            animation=player_2_animations,
+            direction=settings.PLAYER_2_SPAWN_DIRECTION,
+            muzzle_flash=self.muzzle_flash,
+            sfx=self.sfx
         )
 
         self.players.add(self.player_1)
@@ -222,9 +228,12 @@ class Game:
                 self.playing = False
                 self.running = False
             elif event.type == pygame.KEYDOWN:
-                for player in self.players:
-                    if event.key == player.controls.SHOOT:
-                        self.fire_bullet(player)
+                if event.key == pygame.K_ESCAPE:
+                    self.playing = False # restart game
+                else:
+                    for player in self.players:
+                        if event.key == player.controls.SHOOT:
+                            self.fire_bullet(player)
 
     def fire_bullet(self, player: sprites.Player) -> None:
         """

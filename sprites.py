@@ -61,7 +61,7 @@ class Player(Sprite):
 
         animation_ticks_per_frame = settings.FPS // settings.PLAYER_ANIMATION_FPS
         sound_ticks_per_frame = animation_ticks_per_frame
-        
+
         self.animation_tick = itertools.cycle(range(animation_ticks_per_frame))
         self.step_tick = itertools.cycle(range(sound_ticks_per_frame))
 
@@ -72,21 +72,26 @@ class Player(Sprite):
         self.sfx = sfx
 
     def set_mask(self):
+        """Sets a mask from the player image used for collision checking."""
         self.mask = pygame.mask.from_surface(self.image)
 
     def set_rect(self):
+        """Sets the player's rect from the player image and position."""
         self.rect = self.image.get_rect()
         self.rect.midbottom = self.pos
 
     def set_vectors(self, spawn_point):
+        """Sets the initial position, velocity, and acceleration vectors."""
         self.pos = Vector(spawn_point)
         self.vel = Vector(0, 0)
         self.acc = Vector(0, 0)
 
     def set_image(self):
+        """Sets the player's image to the next frame for the idle animation."""
         self.image = next(self.animation.idle)
 
     def update(self):
+        """Updates the sprite each frame, taking into account user input."""
         self.handle_keys()
         self.apply_friction()
         self.update_velocity()
@@ -98,6 +103,7 @@ class Player(Sprite):
             self.respawn()
 
     def update_image(self):
+        """Update the sprite's image to enable animations."""
         if not self.standing:
             if self.falling:
                 self.image = self.animation.jump[0]
@@ -111,6 +117,7 @@ class Player(Sprite):
             # if signs of acc and vel are same, then player is running
             if self.acc.x * self.vel.x > 0:
                 self.image = next(self.animation.run)
+                # only advance animation every x frames due to difference in game FPS and animation FPS
                 if next(self.step_tick) == 0:
                     self.sfx_step()
             else:
@@ -120,6 +127,7 @@ class Player(Sprite):
             self.flip_if_facing_left()
 
     def blit_muzzle_flash_if_shooting(self):
+        """Blits the image of a muzzle flash onto to the sprite if the player is shooting."""
         if self.shooting:
             self.image = self.image.copy()
             x_offset = settings.MUZZLE_FLASH_OFFSET_X
@@ -131,10 +139,12 @@ class Player(Sprite):
             self.shooting = False
 
     def flip_if_facing_left(self):
+        """Flips the player if they are facing left."""
         if self.direction == "left":
             self.image = pygame.transform.flip(self.image, True, False)
 
     def update_position(self):
+        """Updates the position of the player based on the velocity and acceleration."""
         # update position
         # Δd = v_2Δt - (1/2)aΔt^2, Δt = 1 tick -> Δd = v_2 - 0.5a
         self.pos += self.vel - 0.5 * self.acc
@@ -143,6 +153,7 @@ class Player(Sprite):
         self.falling = self.vel.y > 0
 
     def update_velocity(self):
+        """Updates the velocity based on the acceleration."""
         # update new velocity
         # v_2 = v_1 + aΔt, Δt = 1 tick -> v_2 = v_1 + a
         self.vel += self.acc
@@ -152,11 +163,13 @@ class Player(Sprite):
             self.vel.x = 0
 
     def apply_friction(self):
+        """Applies friction to the player acceleration."""
         # model friction as proportional to player speed
         # this limits max speed
         self.acc.x += self.vel.x * settings.PLAYER_FRICTION
 
     def handle_keys(self):
+        """Handles the player keyboard input."""
         self.acc = Vector(0, settings.PLAYER_GRAVITY)
         keys = pygame.key.get_pressed()
         if keys[self.controls.UP] and self.standing:
@@ -167,31 +180,38 @@ class Player(Sprite):
             self.move_right()
 
     def move_right(self):
+        """Causes the player to accelerate right."""
         self.acc.x = settings.PLAYER_ACC
         self.direction = "right"
 
     def move_left(self):
+        """Causes the player to accelerate left."""
         self.acc.x = -settings.PLAYER_ACC
         self.direction = "left"
 
     def jump(self):
+        """Causes the player to jump."""
         self.vel.y = settings.PLAYER_JUMP_HEIGHT
         self.standing = False
         self.sfx_jump()
 
     def sfx_jump(self):
-        sound = self.sfx.get("jump")
+        """Plays the sound effect for the player jumping."""
+        sound = self.sfx["jump"]
         sound.play()
 
     def sfx_step(self):
-        sound = self.sfx.get("step")
+        """Plays the sound effect for the player running."""
+        sound = self.sfx["step"]
         sound.play()
 
     def sfx_death(self):
-        sound = self.sfx.get("death")
+        """Plays the sound effect for the player's death."""
+        sound = self.sfx["death"]
         sound.play()
 
     def respawn(self):
+        """Resets the player's positiion, velocity, and acceleration."""
         self.sfx_death()
         self.pos = self.spawn_point
         self.direction = self.spawn_direction
@@ -224,17 +244,20 @@ class Platform(Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
     def create_surface(self, h: int, w: int):
+        """Creates a surface on which textures are tiled."""
         width = w * self.count
         self.image = pygame.Surface((width, h))
         self.image.fill((255, 0, 0))
 
     def blit_tiles(self, image: pygame.Surface, w: int):
+        """Blits the tile textures onto the surface."""
         x = 0
         for i in range(self.count):
             self.image.blit(image, (x, 0))
             x += w
 
     def set_rect(self, coordinates: tuple):
+        """Sets the platform's rect attribute based on its image."""
         self.rect = self.image.get_rect()
         self.rect.center = coordinates
 
@@ -260,8 +283,20 @@ class Bullet(Sprite):
 
         self.set_vectors(player_pos, x_vel)
         self.set_rect()
+        self.set_mask()
+
+    def set_mask(self):
+        """Sets a mask from the bullet image used for collision checking."""
+        self.mask = pygame.mask.from_surface(self.image)
 
     def set_vectors(self, player_pos: tuple, x_vel: int) -> None:
+        """
+        Sets the position, velocity, and acceleration vectors.
+
+        Parameters:
+        player_pos (tuple): a tuple (x,y) representing the position of the player who shot the bullet.
+        x_vel (int): an int representing how many pixels the bullet moves per frame.
+        """
         player_x, player_y = player_pos
         x_offset, y_offset = self.get_offset(x_vel)
 
@@ -269,6 +304,12 @@ class Bullet(Sprite):
         self.vel = Vector(x_vel, 0)
 
     def get_offset(self, x_vel: int) -> tuple:
+        """
+        Gets the x- and y-offset for the bullets relative to the player's position.
+
+        Parameters:
+        x_vel (int): an int representing how many pixels the bullet is moving per frame.
+        """
         x_offset = settings.BULLET_OFFSET_X
         y_offset = settings.BULLET_OFFSET_Y
         # check if player was moving
@@ -278,23 +319,36 @@ class Bullet(Sprite):
         if x_vel < 0:
             self.image = pygame.transform.flip(self.image, True, False)
             x_offset *= -1  # flip x-offset
-        return (x_offset, y_offset)
+        return x_offset, y_offset
 
     def set_rect(self):
+        """Sets the bullet's rect based on its image."""
         self.rect = self.image.get_rect()
         self.rect.midbottom = self.pos
 
     def update(self):
+        """Updates the bullet position based on its velocity."""
         self.pos.x += self.vel.x
         self.rect.center = self.pos
 
         # check if outside of screen
         if not (0 <= self.pos.x <= settings.WIDTH):
-            self.kill()  # delete from all groups
+            self.kill()  # delete from all sprite groups to prevent memory leak
 
 
 class Scoreboard(Sprite):
+    """A class for Scoreboard objects."""
+
     def __init__(self, font: pygame.freetype.Font, color: tuple, position: tuple, player: object):
+        """
+        Initializes the scoreboard.
+
+        Parameters:
+        font (pygame.freetype.Font): the font used to display text.
+        color (tuple): a tuple (R,G,B) representing the color of the text.
+        position (tuple): a tuple (x,y) representing the position of the midbottom of the scoreboard.
+        player (object): an object representing the player with an attribute called 'respawn_count'.
+        """
         super().__init__()
         self.player = player
         self.pos = position
@@ -311,35 +365,54 @@ class Scoreboard(Sprite):
         self.set_image()
 
     def set_image(self):
+        """Generates the image of the scoreboard based on the player attributes."""
+        # generate the lines of text
         line_1 = self.font.render(self.player.name, self.color)[0]
         line_2 = self.font.render("Deaths: {}".format(
             self.player.respawn_count), self.color)[0]
 
+        # get the dimensions of the lines
         line_space = 10
         default_width = 100
         line_1_height = line_1.get_height()
+        line_2_height = line_2.get_height()
 
+        # get the next icon frame every 6 ticks for 10 FPS
         if next(self.animation_ticker) == 0:
             self.icon = next(self.icon_animation)
         icon_width = self.icon.get_width()
         icon_height = self.icon.get_height()
 
-        width = icon_width + \
-            max(default_width, line_1.get_width(), line_2.get_width())
-        height = max(icon_height, line_1_height +
-                     line_2.get_height() + line_space)
+        # get the minimum width and height
+        width = icon_width + max(
+            default_width,
+            line_1.get_width(),
+            line_2.get_width()
+        )
+        height = max(
+            icon_height,
+            line_1_height +
+            line_2_height +
+            line_space
+        )
 
         self.image = pygame.Surface((width, height))
 
+        # blits an image of the player on the left side of the scoreboard
         self.image.blit(self.icon, (0, 0))
 
+        # blit line 1 (player name)
         self.image.blit(line_1, (icon_width, 0))
+        # blit line 2 (deaths)
         self.image.blit(line_2, (icon_width, line_1_height + line_space))
 
+        # set colorkey to black for transparency
         self.image.set_colorkey((0, 0, 0))
 
+        # set rect
         self.rect = self.image.get_rect()
         self.rect.midbottom = self.pos
 
     def update(self):
+        """Updates the scoreboard each tick."""
         self.set_image()

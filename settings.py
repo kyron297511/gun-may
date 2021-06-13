@@ -7,7 +7,7 @@ WIDTH = 1280
 FPS = 30
 
 # game properties
-VOID_HEIGHT = HEIGHT + 500  # where players die if they cross it
+VOID_HEIGHT = HEIGHT + 500
 
 # colours
 BLACK = (0, 0, 0)
@@ -64,8 +64,8 @@ MUZZLE_FLASH_OFFSET_Y = 17
 MUZZLE_FLASH_RUNNING_OFFSET_Y = -2
 
 # bullet properties
-BULLET_SPEED = 22  # pixels per tick
+BULLET_SPEED = 22
 BULLET_OFFSET_X = 16
 BULLET_OFFSET_Y = -27
-BULLET_RUNNING_OFFSET_Y = -2  # for running
+BULLET_RUNNING_OFFSET_Y = -2
 KNOCKBACK_MULTIPLIER = 1

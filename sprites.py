@@ -7,8 +7,8 @@ import copy
 
 
 # aliases
-Vector = pygame.math.Vector2
-Sprite = pygame.sprite.Sprite
+Vector = pygame.math.Vector2 #creates a two dimensional vector 
+Sprite = pygame.sprite.Sprite #Sprite class
 
 
 class Animation():
@@ -24,8 +24,8 @@ class Animation():
             jump[0]: player going up.
             jump[1]: player going down.
         """
-        self.idle = itertools.cycle(idle)
-        self.run = itertools.cycle(run)
+        self.idle = itertools.cycle(idle)  #cycles the image of an idle character as long as self.idle is true
+        self.run = itertools.cycle(run) #cycles the images of a running character as long as self.run is true
         self.jump = jump
 
 
@@ -42,12 +42,12 @@ class Player(Sprite):
         spawn_point (tuple): coordinates (x, y) where player will be created.
         animations (Animation): contains images that represent the player's visual appearance.
         """
-        super().__init__()
+        super().__init__() #imports the parent class
         self.animation = animation
-        self.set_image()
-        self.set_vectors(spawn_point)
-        self.set_rect()
-        self.set_mask()
+        self.set_image() #creates an image of an idle character by taking consequent images from the Idle images tuple
+        self.set_vectors(spawn_point) #creates position, velocity, and acceleration vectors 
+        self.set_rect() #creates a rectangle the size of the character icon and allows to move the icon
+        self.set_mask() #creates a list of 1s and 0s that reflect character location. This will later be used for collision detection
 
         self.spawn_direction = direction
         self.direction = direction
@@ -78,7 +78,7 @@ class Player(Sprite):
     def set_rect(self):
         """Sets the player's rect from the player image and position."""
         self.rect = self.image.get_rect()
-        self.rect.midbottom = self.pos
+        self.rect.midbottom = self.pos #places the rectangle's and image's midbottom at the required position
 
     def set_vectors(self, spawn_point):
         """Sets the initial position, velocity, and acceleration vectors."""
@@ -92,29 +92,29 @@ class Player(Sprite):
 
     def update(self):
         """Updates the sprite each frame, taking into account user input."""
-        self.handle_keys()
-        self.apply_friction()
-        self.update_velocity()
+        self.handle_keys() #calls a method that reponds to jumps and changes in horizontal direction of motion
+        self.apply_friction() #regulates speed using a coefficient of friction
+        self.update_velocity() #updates velocity according to the current acceleration of the player
         self.update_position()
-        self.update_image()
-        self.set_mask()
+        self.update_image() #updates images of players according to their type and direction of motion
+        self.set_mask()  #creates a new mask to detect future collisions
 
-        if self.pos.y > settings.VOID_HEIGHT:
+        if self.pos.y > settings.VOID_HEIGHT: #if the player is above the height of the screen, they will respawn
             self.respawn()
 
     def update_image(self):
         """Update the sprite's image to enable animations."""
         if not self.standing:
-            if self.falling:
-                self.image = self.animation.jump[0]
-            else:
-                self.image = self.animation.jump[1]
+            if self.falling: #if the player is falling
+                self.image = self.animation.jump[0] #the first image from the jump sequence is displayed
+            else: #if the player is jumping up
+                self.image = self.animation.jump[1]  #the second image from the jump sequence is displayed
 
-            self.blit_muzzle_flash_if_shooting()
-            self.flip_if_facing_left()
+            self.blit_muzzle_flash_if_shooting() #displays the muzzle flash if self.shooting==True
+            self.flip_if_facing_left() #flips the image of the player if they are facing left
 
         elif next(self.animation_tick) == 0:
-            # if signs of acc and vel are same, then player is running
+            # if signs of acceleration and velocity are same, then player is running
             if self.acc.x * self.vel.x > 0:
                 self.image = next(self.animation.run)
                 # only advance animation every x frames due to difference in game FPS and animation FPS
@@ -130,12 +130,13 @@ class Player(Sprite):
         """Blits the image of a muzzle flash onto to the sprite if the player is shooting."""
         if self.shooting:
             self.image = self.image.copy()
+            # the following code regulates the physics of displaying a realistic muzzle flash
             x_offset = settings.MUZZLE_FLASH_OFFSET_X
             y_offset = settings.MUZZLE_FLASH_OFFSET_Y
             if self.acc.x * self.vel.x > 0 and self.standing:
                 y_offset += settings.MUZZLE_FLASH_RUNNING_OFFSET_Y
 
-            self.image.blit(self.muzzle_flash, (x_offset, y_offset))
+            self.image.blit(self.muzzle_flash, (x_offset, y_offset)) #pastes the image of a muzzle flash at the required location
             self.shooting = False
 
     def flip_if_facing_left(self):
@@ -170,13 +171,13 @@ class Player(Sprite):
 
     def handle_keys(self):
         """Handles the player keyboard input."""
-        self.acc = Vector(0, settings.PLAYER_GRAVITY)
-        keys = pygame.key.get_pressed()
-        if keys[self.controls.UP] and self.standing:
+        self.acc = Vector(0, settings.PLAYER_GRAVITY) #sets player's acceleration due to gravity to 0.3 pixels per tick downward
+        keys = pygame.key.get_pressed() #detects the keys pressed at the moment
+        if keys[self.controls.UP] and self.standing: #if the player is currently at rest and 'W' or arrow Up is pressed
             self.jump()
-        if keys[self.controls.LEFT]:
+        if keys[self.controls.LEFT]: #if 'A' or arrow Left is pressed
             self.move_left()
-        elif keys[self.controls.RIGHT]:
+        elif keys[self.controls.RIGHT]: #if 'D' or arrow Right are pressed
             self.move_right()
 
     def move_right(self):
@@ -237,10 +238,10 @@ class Platform(Sprite):
         h = image.get_height()
         w = image.get_width()
 
-        self.create_surface(h, w)
-        self.blit_tiles(image, w)
+        self.create_surface(h, w) #a method that creates a blank surface
+        self.blit_tiles(image, w) #pastes individual tile images onto the surface
 
-        self.set_rect(coordinates)
+        self.set_rect(coordinates) #moves the platforms to required locations
         self.mask = pygame.mask.from_surface(self.image)
 
     def create_surface(self, h: int, w: int):
@@ -259,7 +260,7 @@ class Platform(Sprite):
     def set_rect(self, coordinates: tuple):
         """Sets the platform's rect attribute based on its image."""
         self.rect = self.image.get_rect()
-        self.rect.center = coordinates
+        self.rect.center = coordinates  #moves the platform enveloped in the rectangle to the given coordinates
 
 
 class Bullet(Sprite):

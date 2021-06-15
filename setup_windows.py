@@ -15,5 +15,5 @@ setup(
     version = "0.1",
     description = "Gun Mayhem!",
     options = {"build_exe": build_exe_options},
-    executables = [Executable("game.py", base=base, icon="assets/icon/icon.png")]
+    executables = [Executable("main.py", base=base, icon="assets/icon/icon.png")]
 )

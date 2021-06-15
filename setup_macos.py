@@ -7,7 +7,7 @@ Usage:
 
 from setuptools import setup
 
-APP = ['game.py']
+APP = ['main.py']
 DATA_FILES = ['assets']
 OPTIONS = {'iconfile': 'assets/icon/icon.icns'}
 

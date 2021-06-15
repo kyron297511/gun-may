@@ -1,3 +1,8 @@
+# Program Name: Gun Mayhem
+# Authors: Jacky Zhang, Dasha Yefymenko, Michael Tandazo
+# Date: 13 June 2021
+# Description: A 2-player arcade shooter made using Pygame
+
 import tkinter as tk
 from tkinter.ttk import *
 import game
@@ -10,7 +15,7 @@ class Launcher(tk.Tk):
 
         self.title("Gun Mayhem Launcher")  # set window title
 
-        self.iconbitmap("assets/launcher/icon.ico")  # set window icon
+        # self.iconbitmap("assets/launcher/icon.ico")  # set window icon
 
         # embed the title image into the first row
         canvas = tk.Canvas(width=562, height=101)

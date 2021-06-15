@@ -30,7 +30,7 @@ class Game:
         self.player_2_color = player_2_color
 
     def new(self):
-        """Starts a new Gun Meyham game."""
+        """Starts a new Gun Mayhem game."""
         self.players = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
